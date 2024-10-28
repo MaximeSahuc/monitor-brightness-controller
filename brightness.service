@@ -1,0 +1,16 @@
+[Unit]
+Description = Monitor brightness controller service
+After = graphical.target
+ 
+[Service]
+Type = simple
+ExecStart = python3 /home/maxou/Documents/Projects/monitor-smart-brightness/pc/daemon.py
+User = maxou
+Group = maxou
+Restart = on-failure
+SyslogIdentifier = BrightnessController
+RestartSec = 5
+TimeoutStartSec = infinity
+ 
+[Install]
+WantedBy = multi-user.target
