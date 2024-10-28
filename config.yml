@@ -1,0 +1,17 @@
+server-port: 6981
+
+displays:
+  #  - name: DELL AW2518HF
+  #    i2c-bus: /dev/i2c-5
+  #    brightness-feature-cmd: 10
+  #    max-brightness: 100
+
+  - name: LG ULTRAWIDE
+    i2c-bus: /dev/i2c-5
+    brightness-feature-cmd: 10
+    max-brightness: 100
+
+  - name: Iiyama PL3480WQ
+    i2c-bus: /dev/i2c-8
+    brightness-feature-cmd: 10
+    max-brightness: 60

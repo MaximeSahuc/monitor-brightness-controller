@@ -1,0 +1,5 @@
+ddcutil detect
+
+ddcutil --display 3 capabilities |grep Brightness
+
+ddcutil --display 3 setvcp 10 10
