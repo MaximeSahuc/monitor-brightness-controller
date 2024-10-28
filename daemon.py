@@ -63,7 +63,7 @@ def get_monitor_brightness(i2c_bus):
         if p_status != 0:
             print(f"error: {err}")
         
-        current_brightness = output.decode().split("current value =    ")[1].split(",")[0]
+        current_brightness = output.decode().split("current value =")[1].split(",")[0]
         return current_brightness
 
 
