@@ -12,26 +12,59 @@ CONFIG_FILE_PATH = os.path.join(
 
 config = None
 
-def check_brightness():
-    pass
+
+def get_brightness():
+    with open(BRIGHTNESS_VALUE_FILE_PATH, "r") as br_value_file:
+        value = br_value_file.read()
+        br_value_file.close()
+        return value
 
 
-def set_brightness(monitor):
-    pass
+def set_brightness(monitor, brightness):
+    import subprocess
+
+    global config
+
+    for display in config['displays']:
+        i2c_bus = display['i2c-bus'].split('-')[1]
+
+        if display['i2c-bus'] != monitor:
+            continue
+
+        bright = str(int((display['max-brightness'] / 100) * int(brightness)))
+        brightness_cmd = str(display['brightness-feature-cmd'])
+
+        subprocess.run([
+            "ddcutil",
+            "--bus",
+            i2c_bus,
+            "setvcp",
+            brightness_cmd,
+            bright
+        ])
 
 
-def set_brightness_all():
-    pass
+def get_monitor_brightness(i2c_bus):
+    import subprocess
 
+    for display in config["displays"]:
+        i2c_bus = display["i2c-bus"].split('-')[1]
+        br_cmd = display["brightness-feature-cmd"]
 
-def create_br_value_file(path):
-    # for monitor
-    # write br
-    pass
+        p = subprocess.Popen(
+            f"ddcutil --bus {i2c_bus} getvcp {br_cmd}",
+            stdout=subprocess.PIPE,
+            shell=True
+        )
 
+        output, err = p.communicate()
+        p_status = p.wait()
 
-def read_br_from_file(path):
-    pass
+        if p_status != 0:
+            print(f"error: {err}")
+        
+        current_brightness = output.decode().split("current value =    ")[1].split(",")[0]
+        return current_brightness
 
 
 def read_config(path):
@@ -49,32 +82,9 @@ def init():
     config = read_config(CONFIG_FILE_PATH)
 
     # check brightness value file
-    # if not os.path.isfile(BRIGHTNESS_VALUE_FILE_PATH):
-    if True:
-        import subprocess
-
+    if not os.path.isfile(BRIGHTNESS_VALUE_FILE_PATH):
         with open(BRIGHTNESS_VALUE_FILE_PATH, "w") as br_value_file:
-            for display in config["displays"]:
-                i2c_bus = display["i2c-bus"].split('-')[1]
-                br_cmd = display["brightness-feature-cmd"]
-
-                p = subprocess.Popen(
-                    f"ddcutil --bus {i2c_bus} getvcp {br_cmd}",
-                    stdout=subprocess.PIPE,
-                    shell=True
-                )
-
-                output, err = p.communicate()
-                p_status = p.wait()
-
-                if p_status != 0:
-                    print(f"error: {err}")
-                
-                current_brightness = output.decode().split("current value =     ")[1].split(",")[0]
-                print(current_brightness)
-
-                exit()
-
+            br_value_file.write("50")
             br_value_file.close()
 
 
@@ -85,12 +95,15 @@ def main():
 
     init()
 
-    print(config)
-
     while True:
-        print("a")
-        sleep(1)
-        break
+        target_brightness = get_brightness()
+
+        for display in config["displays"]:
+            monitor_br =  get_monitor_brightness(display["i2c-bus"])
+
+            if monitor_br != target_brightness:
+                set_brightness(display["i2c-bus"], target_brightness)
+
 
 if __name__ == '__main__':
     main()
