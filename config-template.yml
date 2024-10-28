@@ -1,5 +1,3 @@
-server-port: 6981
-
 displays:
   #  - name: DELL AW2518HF
   #    i2c-bus: /dev/i2c-5
